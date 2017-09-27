@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Office Visualisation</title>
+  <link rel="icon" href="http://i.imgur.com/0DFBWrj.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+  h1 {
+    font-family: monospace;
+    font-size: 50px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 500;
+    line-height: 26.4px;
+  }
+
+  </style>
+</head>
+<body>
+<div id = "head_graph" style = "height:30vw;width:100vw;"></div>
+
+<script type = "text/javascript">
+//https://imgur.com/a/b1ivp
+var urlsJSON = {
+  "Jim":"https://i.imgur.com/NjMaz1C.png",
+  "Angela":"https://i.imgur.com/WHHTNa2.jpg",
+  "Andy":"https://i.imgur.com/xrbKf1n.png",
+  "Pam":"https://i.imgur.com/KZJmdhC.jpg",
+  "Oscar":"https://i.imgur.com/k9uMkOY.png",
+  "Phyllis":"https://i.imgur.com/Cits0ka.jpg",
+  "Meredith":"https://i.imgur.com/df2Fh3z.jpg",
+  "Michael":"https://i.imgur.com/qMkZqtk.png",
+  "Ryan":"https://i.imgur.com/OsNbkua.jpg",
+  "Darryl":"https://i.imgur.com/oQRCCHO.png",
+  "Kelly":"https://i.imgur.com/EQuL096.png",
+  "Toby":"https://i.imgur.com/A3ULhp9.jpg",
+  "Erin":"https://i.imgur.com/ADrCpjJ.png",
+  "Kevin":"https://i.imgur.com/42IzGXd.jpg",
+  "Dwight":"https://i.imgur.com/0hIIZue.png"
+}
+var data =
+{  "Jim":21,
+  "Angela":12,
+  "Andy":13,
+  "Pam":5,
+  "Oscar":3,
+  "Phyllis":4,
+  "Meredith":12,
+  "Michael":20,
+  "Ryan":6,
+  "Darryl":9,
+  "Kelly":0,
+  "Toby":6,
+  "Erin":-8,
+  "Kevin":10,
+  "Dwight":2
+}
+
+var container = d3.select("#head_graph");
+
+var svg = container.append("svg")
+              .attr("width", "100vw")
+              .attr("height", "30vw");
+
+var defs = svg.append('svg:defs');
+var BUFFER = 10
+var HEIGHT = $('#head_graph').height();
+var WIDTH = $('#head_graph').width()-2*BUFFER;
+var NUM_ENTRIES = Object.keys(data).length;
+var RADIUS = (WIDTH/(NUM_ENTRIES-1)-WIDTH/(NUM_ENTRIES-1)/(NUM_ENTRIES-1))/2 ;
+// space between top and bottom of div
+var SPACE = HEIGHT-RADIUS-RADIUS;
+//find the Y range.
+var min_data = 10000000;
+var max_data = -10000000;
+for(var i = 0; i < NUM_ENTRIES; i++){
+   if(data[Object.keys(data)[i]]>max_data){
+     max_data = data[Object.keys(data)[i]];
+   }
+   if(data[Object.keys(data)[i]]<min_data){
+     min_data = data[Object.keys(data)[i]];
+   }
+
+}
+
+
+
+var data_range = max_data-min_data;
+console.log("range:" + data_range)
+console.log("Max:" + max_data)
+console.log("Min:" + min_data)
+var xnaught = HEIGHT-RADIUS+min_data/data_range*SPACE;
+console.log(Math.round(xnaught))
+svg.append("rect")
+.attr("x", BUFFER)
+.attr("y", xnaught)
+.attr("width", WIDTH)
+.attr("height", 1)
+.attr("stroke","black");
+
+
+for(var i = 0; i < NUM_ENTRIES; i++){
+  var key = Object.keys(data)[i]
+  var url = urlsJSON[key]
+  var cx = BUFFER+(2*RADIUS*i+RADIUS)
+  var cy = xnaught-data[key]/data_range*SPACE;
+  defs.append("svg:pattern")
+    .attr("id", "grump_avatar"+String(i))
+    .attr("width", $('#head_graph').width())
+    .attr("height", $('#head_graph').height())
+    .attr("patternUnits", "userSpaceOnUse")
+    .append("svg:image")
+    .attr("xlink:href", url)
+    .attr("height", String(Math.round((RADIUS*2))))
+    .attr("width", String(Math.round((RADIUS*2))))
+    .attr("x", String(Math.round(cx-RADIUS)))
+    .attr("y", String(Math.round(cy-RADIUS)));
+  svg.append("circle")
+    .attr("cx",  String(Math.round(cx)))
+    //.attr("cy", "5vw")
+    .attr("cy", String(Math.round(cy)))
+    .attr("r", String(Math.round(RADIUS)))
+
+    .style("fill", "#fff")
+    .style("fill", "url(#grump_avatar"+ String(Math.round(i))+")")
+
+ }
+ //$(window).on('resize', resize);
+window.addEventListener('resize', function(event) {
+    // get width/height with container selector (body also works)
+    // or use other method of calculating desired values
+    var width = $('#myselector').width();
+    var height = $('#myselector').height();
+
+    // set attrs and 'resume' force
+    container.attr('width', width);
+    container.attr('height', height);
+})
+</script>
+<div class = "container" >
+
+<br>
+
+    <div id = "question_container">
+    </div>
+</div>
+</body>
