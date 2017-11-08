@@ -5,5 +5,3 @@ Analytics project using the scripts of the TV show the Office to examine the eff
 
 # About
 Scrape.py code in the scrape folder. 
-
-Parse code is a mess.
