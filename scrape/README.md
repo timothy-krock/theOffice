@@ -1,1 +1,1 @@
-#Writes the scripts of the show to textfiles.
+* Writes the scripts of the show to textfiles.
