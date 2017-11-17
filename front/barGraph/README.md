@@ -1,1 +1,2 @@
-# Directory for the mockup of the Characters' presence in the show
+# Bar Graph
+Directory for the mockup of the Characters' presence in the show
