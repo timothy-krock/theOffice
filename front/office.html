@@ -1,50 +1,889 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-
-  <!-- Latest compiled and minified CSS -->
+  <title>Office Visualisation</title>
+  <link rel="icon" href="https://i.imgur.com/NPoFGdS.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-
-  <!-- jQuery library -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-  <!-- Latest compiled JavaScript -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <style>
-    h1 {
-    	font-family: monospace;
-    	font-size: 50px;
-    	font-style: normal;
-    	font-variant: normal;
-    	font-weight: 500;
-    	line-height: 26.4px;
-    }
-        <link rel="icon" href="office.jpeg">
-    </style>
-</head>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
 
-<body onload="enter();">
-  <div class = "container" >
+  <style>
+  h1 {
+    font-family: monospace;
+    font-size: 6.5vw;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 500;
+    line-height: 7vw;
+  }
+  .tab { margin-left: 40px; }
+
+
+  </style>
+</head>
+<body>
+  <h1 style = "margin-left:10vw">The Office: Analysis<br><small>By Tim Krock</h1></h1>
+  <div style = "text-align:left;margin-left:10vw;width:80vw;font-size: 3.55vw;color:#555555">
+    <small>
+    <p>In a conversation about NBC's show The Office, often the first thing brought up
+      is something along the lines "Steve Carell's performance made the show." or
+      "Oh, I didn't watch it after Micheal left."
+      Using the transcripts and IMDB ratings of each episode, we can decide whether that's true.
+      <br><div id = "info">
+      This graph shows the expected impact of each character's appearance on the
+      IMDB ratings of an episode of The Office.
+    </div>
+    </p>
+  </small>
+</div>
+  <br>
+<div id = "head_graph" style = "height:40vw;width:100vw;"></div>
+
+<script type = "text/javascript">
+var hoverStr = "Hover for Info";
+
+var urlsJSON = {
+  "Jim":"https://i.imgur.com/NjMaz1C.png",
+  "Angela":"https://i.imgur.com/WHHTNa2.jpg",
+  "Andy":"https://i.imgur.com/xrbKf1n.png",
+  "Pam":"https://i.imgur.com/KZJmdhC.jpg",
+  "Oscar":"https://i.imgur.com/k9uMkOY.png",
+  "Phyllis":"https://i.imgur.com/Cits0ka.jpg",
+  "Meredith":"https://i.imgur.com/df2Fh3z.jpg",
+  "Michael":"https://i.imgur.com/qMkZqtk.png",
+  "Ryan":"https://i.imgur.com/OsNbkua.jpg",
+  "Darryl":"https://i.imgur.com/oQRCCHO.png",
+  "Kelly":"https://i.imgur.com/EQuL096.png",
+  "Toby":"https://i.imgur.com/A3ULhp9.jpg",
+  "Erin":"https://i.imgur.com/ADrCpjJ.png",
+  "Kevin":"https://i.imgur.com/42IzGXd.jpg",
+  "Dwight":"https://i.imgur.com/0hIIZue.png"
+}
+var data ={  "Jim":1.706,
+  "Angela":-0.046,
+  "Andy":0.141,
+  "Pam":-0.054,
+  "Oscar":0.037,
+  "Phyllis":-0.011,
+  "Meredith":0.112,
+  "Michael":0.515,
+  "Ryan":-.067,
+  "Darryl":.044,
+  "Kelly":0.067,
+  "Toby":0.111,
+  "Erin":-.024,
+  "Kevin":-.0379,
+}
+var data3   ={  "Jim":-.06,
+  "Angela":.004,
+  "Andy":.7,
+  "Pam":.5,
+  "Oscar":  .2,
+  "Phyllis":.011,
+  "Meredith":-.111,
+  "Michael":.515,
+  "Ryan":.067,
+  "Darryl":-.044,
+  "Kelly":-0.067,
+  "Toby":-0.111,
+  "Erin":.023,
+  "Kevin":.0379,
+}
+var data2  ={  "Jim":.0023,
+  "Angela":.0041,
+  "Andy":-.0005,
+  "Pam":-.0005,
+  "Oscar":.0015,
+  "Phyllis":.0085,
+  "Meredith":.0037,
+  "Michael":.0052,
+  "Ryan":-.0016,
+  "Darryl":.0006,
+  "Kelly":0.0042,
+  "Toby":0.0026,
+  "Erin":-.0076,
+  "Kevin":.0083,
+}
+
+var container = d3.select("#head_graph");
+var svg = container.append("svg")
+              .attr("width", "100vw")
+              .attr("height", "40vw");
+var defs = svg.append('svg:defs');
+var div = d3.select("#tipwell").append("div")
+    .style("opacity", 0);
+
+var BUFFER = $('#head_graph').width()*.015
+var HEIGHT = $('#head_graph').height();
+var WIDTH = $('#head_graph').width()-2*BUFFER;
+
+
+var NUM_ENTRIES_1 = Object.keys(data).length;
+var RADIUS_1 = (WIDTH/(NUM_ENTRIES_1-1)-WIDTH/(NUM_ENTRIES_1-1)/(NUM_ENTRIES_1-1))/2 ;
+var SPACE = HEIGHT-RADIUS_1-RADIUS_1-RADIUS_1-RADIUS_1;
+var MIN_DATA_1 = 10000000;
+var MAX_DATA_1 = -10000000;
+
+
+for(var i = 0; i < NUM_ENTRIES_1; i++){
+   if(data[Object.keys(data)[i]]>MAX_DATA_1){
+     MAX_DATA_1 = data[Object.keys(data)[i]];
+   }
+   if(data[Object.keys(data)[i]]<MIN_DATA_1){
+     MIN_DATA_1 = data[Object.keys(data)[i]];
+   }
+
+}
+var DATA_RANGE_1 = MAX_DATA_1-MIN_DATA_1;
+var Y_NAUGHT_1 = HEIGHT-RADIUS_1+MIN_DATA_1/DATA_RANGE_1*SPACE;
+
+//ex: {micheal: [1,20],jim: [2,80]}
+var OBJ_1_COORDINATES = {}
+//CONDENSE
+for(var i = 0; i < NUM_ENTRIES_1; i++){
+  var key = Object.keys(data)[i]
+
+  var cy = Y_NAUGHT_1-data[key]/DATA_RANGE_1*SPACE;
+  var cx = BUFFER+WIDTH/2
+  var NOTTOUCHING = 0
+  while(!NOTTOUCHING){
+      if(i%2){cx = cx - 1}
+      else{cx = cx +1}
+      for(var j = 0; j < i; j++){
+          var cx0 = OBJ_1_COORDINATES[Object.keys(data)[j]][0];
+          var cy0 = OBJ_1_COORDINATES[Object.keys(data)[j]][1];
+          if(((cx-cx0)*(cx-cx0)+(cy-cy0)*(cy-cy0)) >= 4*RADIUS_1*RADIUS_1){
+            NOTTOUCHING++;
+          }
+      }
+      if(NOTTOUCHING == i){
+        NOTTOUCHING = 1;
+      }
+      else {
+        NOTTOUCHING = 0;
+      }
+
+      if(cx <= RADIUS_1+BUFFER){
+        NOTTOUCHING = 1;
+      }
+      if(cx >= WIDTH-RADIUS_1-BUFFER){
+        NOTTOUCHING = 1;
+      }
+    }
+    OBJ_1_COORDINATES[key] = [cx, cy]
+}
+var XMIN = 124350
+var XMAX = 0
+for(var i = 0; i < NUM_ENTRIES_1; i++){
+  var key = Object.keys(data)[i]
+    if(OBJ_1_COORDINATES[key][0] > XMAX){
+      XMAX = OBJ_1_COORDINATES[key][0];
+    }
+    if(OBJ_1_COORDINATES[key][0] < XMIN){
+      XMIN = OBJ_1_COORDINATES[key][0];
+    }
+}
+
+XDIFF = XMAX-XMIN
+for(var i = 0; i < NUM_ENTRIES_1; i++){
+    var key = Object.keys(data)[i]
+    //OBJ_1_COORDINATES[key][0] = WIDTH/2+(OBJ_1_COORDINATES[key][0]-WIDTH/2)/XDIFF*(WIDTH-BUFFER-BUFFER);
+    OBJ_1_COORDINATES[key][0] = OBJ_1_COORDINATES[key][0]+RADIUS_1-BUFFER
+}
+
+
+
+
+var min_distance = XMAX*XMAX*WIDTH*WIDTH
+for(var i = 0; i < NUM_ENTRIES_1; i++){
+  for(var j = 0; j < NUM_ENTRIES_1; j++){
+    if(i != j){
+      var x0 = OBJ_1_COORDINATES[Object.keys(data)[i]][0];
+      var x1 = OBJ_1_COORDINATES[Object.keys(data)[j]][0];
+      var y0 = OBJ_1_COORDINATES[Object.keys(data)[i]][1];
+      var y1 = OBJ_1_COORDINATES[Object.keys(data)[j]][1];
+      if(min_distance > Math.sqrt((y0-y1)*(y0-y1)+(x0-x1)*(x0-x1))/2){
+        min_distance = Math.sqrt((y0-y1)*(y0-y1)+(x0-x1)*(x0-x1))/2
+      }
+    }
+  }
+}
+RADIUS_1 = min_distance
+
+
+///////////////////////////
+// CODE FOR SECOND DATASET
+var NUM_ENTRIES_2 = Object.keys(data2).length;
+var RADIUS_2 = (WIDTH/(NUM_ENTRIES_2-1)-WIDTH/(NUM_ENTRIES_2-1)/(NUM_ENTRIES_2-1))/2 ;
+var SPACE2 = HEIGHT-RADIUS_2-RADIUS_2-RADIUS_2-RADIUS_2;
+var MIN_DATA_2 = 10000000;
+var MAX_DATA_2 = -10000000;
+
+
+for(var i = 0; i < NUM_ENTRIES_2; i++){
+   if(data2[Object.keys(data2)[i]]>MAX_DATA_2){
+     MAX_DATA_2 = data2[Object.keys(data2)[i]];
+   }
+   if(data2[Object.keys(data2)[i]]<MIN_DATA_2){
+     MIN_DATA_2 = data2[Object.keys(data2)[i]];
+   }
+
+}
+var DATA_RANGE_2 = MAX_DATA_2-MIN_DATA_2;
+var Y_NAUGHT_2 = HEIGHT-RADIUS_2+MIN_DATA_2/DATA_RANGE_2*SPACE;
+
+//ex: {micheal: [1,20],jim: [2,80]}
+var OBJ_2_COORDINATES = {}
+//CONDENSE
+for(var i = 0; i < NUM_ENTRIES_2; i++){
+  var key = Object.keys(data2)[i]
+
+  var cy = Y_NAUGHT_2-data2[key]/DATA_RANGE_2*SPACE2;
+  var cx = BUFFER+WIDTH/2
+
+  OBJ_2_COORDINATES[Object.keys(data2)[i]] = [cx-RADIUS_2*2*i,cy]
+
+
+  var NOTTOUCHING = 0
+  while(!NOTTOUCHING){
+      if(i%2){cx = cx - 1}
+      else{cx = cx +1}
+      for(var j = 0; j < i; j++){
+          var cx0 = OBJ_2_COORDINATES[Object.keys(data2)[j]][0];
+          var cy0 = OBJ_2_COORDINATES[Object.keys(data2)[j]][1];
+          if(((cx-cx0)*(cx-cx0)+(cy-cy0)*(cy-cy0)) >= 4*RADIUS_2*RADIUS_2){
+            NOTTOUCHING++;
+          }
+      }
+      if(NOTTOUCHING == i){
+        NOTTOUCHING = 1;
+      }
+      else {
+        NOTTOUCHING = 0;
+      }
+
+      if(cx <= RADIUS_2+BUFFER){
+        NOTTOUCHING = 1;
+      }
+      if(cx >= WIDTH-RADIUS_2-BUFFER){
+        NOTTOUCHING = 1;
+      }
+    }
+    OBJ_2_COORDINATES[key] = [cx, cy]
+}
+var XMIN = 124350
+var XMAX = 0
+for(var i = 0; i < NUM_ENTRIES_2; i++){
+  var key = Object.keys(data2)[i]
+    if(OBJ_2_COORDINATES[key][0] > XMAX){
+      XMAX = OBJ_2_COORDINATES[key][0];
+    }
+    if(OBJ_2_COORDINATES[key][0] < XMIN){
+      XMIN = OBJ_2_COORDINATES[key][0];
+    }
+}
+
+XDIFF = XMAX-XMIN
+
+for(var i = 0; i < NUM_ENTRIES_2; i++){
+    var key = Object.keys(data2)[i]
+    //OBJ_1_COORDINATES[key][0] = WIDTH/2+(OBJ_1_COORDINATES[key][0]-WIDTH/2)/XDIFF*(WIDTH-BUFFER-BUFFER);
+    OBJ_2_COORDINATES[key][0] = OBJ_2_COORDINATES[key][0]+RADIUS_2-BUFFER
+}
+x0 = 0;
+x1 = 0;
+y0 = 0;
+y1 = 0;
+var min_distance = XMAX*XMAX*WIDTH*WIDTH
+for(var i = 0; i < NUM_ENTRIES_2; i++){
+  for(var j = 0; j < NUM_ENTRIES_2; j++){
+    if(i != j){
+      var x0 = OBJ_2_COORDINATES[Object.keys(data2)[i]][0];
+      var x1 = OBJ_2_COORDINATES[Object.keys(data2)[j]][0];
+      var y0 = OBJ_2_COORDINATES[Object.keys(data2)[i]][1];
+      var y1 = OBJ_2_COORDINATES[Object.keys(data2)[j]][1];
+      if(min_distance > Math.sqrt((y0-y1)*(y0-y1)+(x0-x1)*(x0-x1))/2){
+        min_distance = Math.sqrt((y0-y1)*(y0-y1)+(x0-x1)*(x0-x1))/2
+      }
+    }
+  }
+}
+RADIUS_2 = min_distance
+
+var Y_BUFF = -RADIUS_1
+var axis = svg.append("rect")
+  .attr("x", XMIN/2-RADIUS_1)
+  .attr("y", Y_NAUGHT_1-RADIUS_1)
+  .attr("width", WIDTH - XMIN/2-3*BUFFER)
+  .attr("height", 1)
+  .attr("stroke","black");
+
+var yaxis = svg.append("rect")
+  .attr("x", XMIN/2-RADIUS_1-BUFFER)
+  .attr("y", 0)
+  .attr("width", 1)
+  .attr("height", $('#head_graph').height())
+  .attr("stroke","white");
+var ytick= svg.append("rect")
+  .attr("x", XMIN/2-RADIUS_1)
+  .attr("y", Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)
+  .attr("width", BUFFER)
+  .attr("height", 1)
+  .attr("stroke","black")
+var ytickLow= svg.append("rect")
+  .attr("x", XMIN/2-RADIUS_1)
+  .attr("y", 1.3*Y_NAUGHT_1)
+  .attr("width", BUFFER)
+  .attr("height", 1)
+  .attr("stroke","black")
+var ytickLabel= svg.append("text")
+  .text( "1.0")
+  .attr("x", XMIN/2-RADIUS_1+1.2*BUFFER)
+  .attr("y", SPACE/DATA_RANGE_1*1+2.5*BUFFER)
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "3vw")
+  .attr("fill", "#555555");for(var i = 0; i < NUM_ENTRIES_1; i++){
+
+  var key = Object.keys(data)[i];
+  var url = urlsJSON[key];
+  var cx = OBJ_1_COORDINATES[key][0]-RADIUS_1;
+  var cy = OBJ_1_COORDINATES[key][1]+Y_BUFF
+  defs.append("svg:pattern")
+    .attr("id", key)
+    .attr("width", $('#head_graph').width())
+    .attr("height", $('#head_graph').height())
+    .attr("patternUnits", "userSpaceOnUse")
+    .append("svg:image")
+    .attr("xlink:href", url)
+    .attr("height", String(Math.round((RADIUS_1*2))))
+    .attr("width", String(Math.round((RADIUS_1*2))))
+    .attr("x", String(Math.round(cx-RADIUS_1)))
+    .attr("y", String(Math.round(cy-RADIUS_1)));
+  defs.append("svg:pattern")
+    .attr("id", key + "DOUBLE")
+    .attr("width", $('#head_graph').width())
+    .attr("height", $('#head_graph').height())
+    .attr("patternUnits", "userSpaceOnUse")
+    .append("svg:image")
+    .attr("xlink:href", url)
+    .attr("height", String(Math.round((RADIUS_1*4))))
+    .attr("width", String(Math.round((RADIUS_1*4))))
+    .attr("x", String(Math.round(cx-2*RADIUS_1)))
+    .attr("y", String(Math.round(cy-2*RADIUS_1)));
+  defs.append("svg:pattern")
+    .attr("id", key + "2")
+    .attr("width", $('#head_graph').width())
+    .attr("height", $('#head_graph').height())
+    .attr("patternUnits", "userSpaceOnUse")
+    .append("svg:image")
+    .attr("xlink:href", url)
+    .attr("height", String(Math.round((RADIUS_2*2))))
+    .attr("width", String(Math.round((RADIUS_2*2))))
+    .attr("x", String(Math.round(cx-RADIUS_2)))
+    .attr("y", String(Math.round(cy-RADIUS_2)));
+  defs.append("svg:pattern")
+    .attr("id", key + "DOUBLE2")
+    .attr("width", $('#head_graph').width())
+    .attr("height", $('#head_graph').height())
+    .attr("patternUnits", "userSpaceOnUse")
+    .append("svg:image")
+    .attr("xlink:href", url)
+    .attr("height", String(Math.round((RADIUS_2*4))))
+    .attr("width", String(Math.round((RADIUS_2*4))))
+    .attr("x", String(Math.round(cx-2*RADIUS_2)))
+    .attr("y", String(Math.round(cy-2*RADIUS_2)));
+  circle = svg.append("circle")
+    .attr("cx",  String(Math.round(cx)))
+    .attr("cy", String(Math.round(cy)))
+    .attr("r", String(Math.round(RADIUS_1)))
+    .attr('id', key)
+    .style("fill", "#fff")
+    .style("fill", "url(#"+ key+")")
+    .on("mouseover", mouseover1)
+    .on("mouseout",mouseout1);
+
+ }
+ function mouseover1(){
+   document.getElementById("tipwell").innerHTML = "<b>"+this.id+ "</b>: " + data[this.id] + " &Delta;IMDB"
+   d3.select(this)
+   .transition()
+   //.attr("transform", "matrix(1,0,0,1,0,0)")
+   .attr("r", String(Math.round(2*RADIUS_1)))
+   .style("fill","url(#"+ this.id+"DOUBLE)");
+   this.parentNode.appendChild(this);
+ }
+ function mouseout1(){
+   document.getElementById("tipwell").innerHTML = hoverStr
+   d3.select(this)
+   .transition()
+   .attr("r", String(Math.round(RADIUS_1)))
+   .transition()
+   .style("fill","url(#"+ this.id+")");
+ }
+ function mouseover2(){
+   document.getElementById("tipwell").innerHTML = "<b>"+this.id+ "</b>: " + data2[this.id] + " &Delta;IMDB"
+   d3.select(this)
+   .transition()
+   .attr("r", String(Math.round(2*RADIUS_2)))
+   .style("fill","url(#"+ this.id+"DOUBLE2)");
+   this.parentNode.appendChild(this);
+ }
+ function mouseout2(){
+   document.getElementById("tipwell").innerHTML = hoverStr
+   d3.select(this)
+   .transition()
+   .attr("r", String(Math.round(RADIUS_2)))
+   .transition()
+   .style("fill","url(#"+ this.id+"2)");
+ }
+ function TRANSITION1(){
+   document.getElementById("info").innerHTML = "This graph shows the expected effect of a character "+
+   "getting another line on the IMDB ratings of an episode of The Office."
+   d3.selectAll("circle").
+   transition().attr("transform", function(){
+     var id = this.id
+
+     var x = -OBJ_1_COORDINATES[id][0]+OBJ_2_COORDINATES[id][0]
+     var y = -OBJ_1_COORDINATES[id][1]+OBJ_2_COORDINATES[id][1]
+     return "translate("+x+","+y+" )"
+   }).delay(5)
+
+   d3.selectAll("circle")
+   .on("mouseover",mouseover2)
+   .on("mouseout",mouseout2);
+   ytick.transition().attr("transform", function(){
+     //console.log(ytickLabel)
+
+     return "translate(0,"+(-(Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)+
+     Y_NAUGHT_2-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005-RADIUS_2)+")";
+   });
+   ytickLabel.transition().attr("transform", function(){
+     //console.log(ytickLabel)
+     this.innerHTML = "0.005"
+     /*
+     var text = d3.select('svg').selectAll('text')[0]
+
+     for (var i=0; i<text.length; i++){
+         console.log(text[i].innerHTML = "new")
+     }*/
+     return "translate(0,"+(-(Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)+
+     Y_NAUGHT_2-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005-RADIUS_2)+")";
+   });
+
+   ytickLow.transition().attr("transform", function(){
+     //console.log(ytickLabel)
+
+     return "translate(0,"+(-(1.3*Y_NAUGHT_1)+
+     (Y_NAUGHT_2+-RADIUS_2-((-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005))))*1+")";
+   });
+
+
+
+    axis.transition().attr("transform", function(){
+      //return "translate(0,"+(-Y_NAUGHT_1+Y_NAUGHT_2)+" )"
+      return "translate(0,"+(-Y_NAUGHT_1+Y_NAUGHT_2-RADIUS_1 + RADIUS_2)+" )"
+   })
+
+      //ytickLabel.transition
+   ////////////////
+   //  RESET THE CIRCLE SIZE
+  /*    d3.selectAll("circle")
+      .transition()
+      .attr("r", String(Math.round(RADIUS_2)))
+      .transition()
+      .delay(3)
+      .style("fill","url(#"+ this.id+"2)");
+      d3.selectAll("circle")
+      .transition()
+      .attr("r", String(Math.round(RADIUS_2)))
+      .transition()
+      .style("fill","url(#"+ this.id+"2)");
+*/
+
+       document.getElementById('a').classList.remove("active")
+       document.getElementById('b').classList.add("active")
+       document.getElementById('a').classList.remove("btn-primary")
+       document.getElementById('b').classList.add("btn-primary")
+    }
+function loadTipwell(){
+  alert("HELLO")
+  document.getElementById("tipwell").innerHTML = hoverStr
+
+}
+function TRANSITION2(){
+  document.getElementById("info").innerHTML = "This graph shows the expected impact of each character's "+
+  "appearance on the IMDB ratings of an episode of The Office."
+  d3.selectAll("circle").transition().attr("transform", "translate(0,0)").delay(5)
+  axis.transition().attr("transform", function(){
+    return "translate(0,0)"
+
+    d3.selectAll("circle")
+    .transition()
+    .attr("r", String(Math.round(RADIUS_2)))
+    .transition()
+    .delay(3)
+    .style("fill","url(#"+ this.id+")");
+    d3.selectAll("circle")
+    .transition()
+    .attr("r", String(Math.round(RADIUS_2)))
+    .transition()
+    .style("fill","url(#"+ this.id+")");
+
+
+  });
+  ytick.transition().attr("transform", function(){
+    //console.log(ytickLabel)
+
+    return "translate(0,0)";
+  });
+  ytickLow.transition().attr("transform", function(){
+    //console.log(ytickLabel)
+
+    return "translate(0,0)";
+
+  });
+  ytickLabel.transition().attr("transform", function(){
+    //console.log(ytickLabel)
+    this.innerHTML = "1.0"
+
+    return "translate(0,0)";
+  });
+
+  d3.selectAll("circle")
+  .on("mouseover",mouseover1)
+  .on("mouseout",mouseout1)
+  document.getElementById('b').classList.remove("active")
+  document.getElementById('a').classList.add("active")
+  document.getElementById('b').classList.remove("btn-primary")
+  document.getElementById('a').classList.add("btn-primary")
+}
+
+</script>
+<br>
+
+
+<div class="well well-lg" id = "tipwell" style = "margin-left:10vw;text-align:center;width:80vw;" >Hover for Info</div>
+
+
+
+    <div class="btn-group" style = "margin-left:10vw;width:80vw;" role="group" aria-label="Basic example">
+      <button id = "a" onclick = "TRANSITION2()" type="button"style = "width:40vw;" class="btn btn-primary active">Appearance &Delta;IMDB</button>
+      <button id = "b" onclick = "TRANSITION1()" type="button"style = "width:40vw;"  class="btn">Per-Line &Delta;IMDB</button>
+
+    </div>
+
+<br><br>
+<div style = "text-align:left;margin-left:10vw;width:80vw;font-size: 3.5vw;color:#555555">
+  <small>
+
+  </p>
+  <h1 style = "font-size: 5vw">Notes and Observations:</h1>
+  <ul class="list-group">
+  <li class="list-group-item">  In the regressions behind both visualizations,
+    Micheal had a positive impact on the ratings to a 99.999% confidence level,
+    so we can conclude that the show did indeed get worse when Micheal left.
+    </li>
+  <li class="list-group-item">Jim's effect in the first visualization is so stark because he's only absent
+  in arount three episodes, and those episodes were poorly recieved.</li>
+  <li class="list-group-item">Dwight speaks in every episode, so he was absorbed into <thead>
+    constant (Average IMDB)
+  </thead>.
+</li>
+</ul>
+</small>
+</div>
+<br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<button data-toggle="collapse" class = "btn btn-default"
+  data-target="#demo" style = "margin-left:30vw;text-align:center;width:40vw;"
+  >Methods
+</button>
+
+<div id="demo" class="collapse" style = "margin-left:10vw;text-align:left;width:80vw;">
+  <h3>
+    <small>
+      The Office is one of the most well-known TV shows in the states. I've watched the series since I was in middle school.
+      It's very popular, and it comes up in conversation from time to time. In a lot of conversations, I'd hear things like
+      "Oh the show get so much worse when Micheal leaves!"
+      It occurred to me that that can be measured, so thought it might be fun to take a look at the series from an analytical standpoint.
+      <br>
+      <br>
+      Using a tool called <a href="https://en.wikipedia.org/wiki/Linear_regression">linear regression</a>, we can do just that.
+      In the initial regressions, I've run, the findings are pretty inconvrovertible. Micheal Scott did indeed have a profound effect
+      on the ratings of the show.
+      <br><br>
+      The following chart is the first regression I ran. The column in green shows the expected effect that that character's appearance
+      in a given episode of the Office would be expected to have. <br>
+      <img style = "width:80vw;height:50vw;" src = "https://i.imgur.com/lfPVh9A.png" ></img>
+      <br>
+      For example, Micheal's coefficient is 0.515. That means that you can expected
+      an episode with Micheal Scott to be rated .515 better than an episode without, holding all else constant. The fourth column, the P value
+      column essentially shows the probability of the given coefficients in the first column being wrong. Lower numbers indicate that there is
+      a very low chance of these numbers wrong, so the lower P-Value, the better. The two highlighted in blue are the two lowest, and the two most
+      interesting, I think.
+      Micheal, consistent with the popular narrative, is good for the show, and the show was, statistically significantly, better with him
+      than without. More than that, though, it shows that Jim Halpert was correlated with a very high bump in ratings. This must have been
+      less pronounced because he wasn't gone for long periods of time, ALA Micheal.
+    </small>
+  </h3>
 
   <br>
-    <h1>some analytics</h1>
-    <h3>
-      <small>
-        The Office is one of the most well-known TV shows in the states. I've watched the series since I was in middle school.
-        It's very popular, and it comes up in conversation from time to time. In a lot of conversations, I'd hear things like
-        "Oh the show get so much worse when Micheal leaves!"
-        It occurred to me that that can be measured, so thought it might be fun to take a look at the series from an analytical standpoint.
-        <br>
-        <br>
-        Using a tool called <a href="https://en.wikipedia.org/wiki/Linear_regression">linear regression</a>
-      </small>
-    </h3>
-    <br>
-      <div id = "question_container">
-      </div>
-  </div>
+  <h3>
+    <small>
+      This second regression, I think, is really interesting. I regressed the ratings on the number of lines the main characters
+      had in each episode. The coefficients in green, this time, show the marginal rate of return, in ratings, to lines. In English,
+      if you give a character another line, what happens to the rating?
+      <img style = "width:80vw;height:50vw;" src = "https://i.imgur.com/G0feewV.png" ></img>
+      Statistically significantly, Micheal increases the show's ratings with his lines, but more interesting, and far more fun,
+      are the two characters with higher coefficients: Phyllis and Kevin both have coefficients about 60 percent higher than Micheal.
+      What this means is that the Kevin and Phyllis show would have been a massive hit–or that they didn't have many lines.
+
+    </small>
+  </h3>
+
+  <button data-toggle="collapse" class = "btn btn-primary"
+    data-target="#demo" style = "margin-left:20vw;text-align:center;width:40vw;"
+    >Hide <span class="glyphicons glyphicons-collapse-top"></span>
+  </button>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br><br><div>
+<h1 style = "margin-left:10vw;width:80vw;font-size:5vw;line-height:4.5vw;">Chord Diagram: Shared Scenes Between Characters</h1>
+
+  <div style = "width:94vw;margin-left:3vw;height:94vw;" id = "chord">
+    <script>
+    ///////////////////////////////////////////////////
+    //
+    //
+    ///////////////////////////////////////////////////
+    //  Chord Diagram Mouseover Code
+    //  http://bl.ocks.org/nbremer/f9dacd23eece9d23669c
+    var outerRadius = $('#chord').width()/2
+    if(outerRadius > $('#chord').height()/2)
+      outerRadius = $('#chord').height()/2
+
+    var innerRadius = outerRadius*8/10;
+    var fill = d3.scale.category20c();
+
+    var chord = d3.layout.chord()
+        .padding(.04)
+        .sortSubgroups(d3.descending)
+        .sortChords(d3.descending);
+
+    var arc = d3.svg.arc()
+        .innerRadius(innerRadius)
+        .outerRadius(innerRadius + 20);
+
+    var svg = d3.select("#chord").append("svg")
+        .attr("width", outerRadius * 2)
+        .attr("height", outerRadius * 2)
+      .append("g")
+        .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+
+    d3.json("https://raw.githubusercontent.com/timothy-krock/theOffice/master/front/data/interactions.json", function(error, imports) {
+
+      if (error) throw error;
+      var indexByName = d3.map(),
+          nameByIndex = d3.map(),
+          matrix = [],
+          n = 0;
+        // Compute a unique index for each package name.
+        imports.forEach(function(d) {
+          if (!indexByName.has(d = (d.name))) {
+            nameByIndex.set(n, d);
+            indexByName.set(d, n++);
+          }
+        });
+
+
+
+      // Construct a square matrix counting package imports.
+      imports.forEach(function(d,i ) {
+        var source = indexByName.get((d.name)),
+            row = matrix[source];
+         row = matrix[source] = [];
+         for (var i = -1; ++i < n+1;){
+           row[i] = 1;
+        }
+
+      });
+      matrixSize = (matrix.length)
+      imports.forEach(function(d) {
+
+        matrix[indexByName.get((d.name))][indexByName.get((d.imports[0]))]*=d.size;
+
+      });
+      imports.forEach(function(d) {
+        //matrix[indexByName.get((d.name))][indexByName.get((d.imports[0]))]*=d.size;
+
+        try{
+          matrix[indexByName.get((d.imports[0]))][indexByName.get((d.name))]*=d.size;
+          matrix[indexByName.get((d.name))][indexByName.get((d.name))] = 0;
+          matrix[indexByName.get((d.imports[0]))][indexByName.get((d.imports[0]))] = 0;
+
+
+        }
+        catch(err){console.log("whatever")}
+
+
+        //matrix[matrixSize-indexByName.get((d.imports[0]))][matrixSize-indexByName.get((d.name))]*=d.size;
+
+      });
+      chord.matrix(matrix);
+
+      var g = svg.selectAll(".group")
+          .data(chord.groups)
+        .enter().append("g")
+          .attr("class", "group");
+
+      g.append("path")
+          .style("fill", function(d) { return fill(d.index); })
+          .style("stroke", function(d) { return fill(d.index); })
+          .on("mouseover", fadeset)
+          .on("mouseout", unfade())
+          .attr("d", arc);
+      if($('#chord').width() > 688){
+        g.append("text")
+            .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
+            .attr("dy", ".35em")
+            .attr("transform", function(d) {
+              return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+                  + "translate(" + (innerRadius + 25) + ")"
+                  + (d.angle > Math.PI ? "rotate(180)" : "");
+            })
+            .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+            .text(function(d) { return nameByIndex.get(d.index); });
+    }
+      svg.selectAll("chord")
+          .data(chord.chords)
+          .enter().append("path")
+          .attr("class", "chord")
+          .style("stroke", function(d) { return d3.rgb(fill(d.source.index)).darker(); })
+          .style("fill", function(d) { return fill(d.source.index); })
+          .style('opacity', .67)
+          //.on("mouseover", fadeOnChord)
+          //.on("mouseout", fade(opacityDefault))
+          .on("mouseover", fade)
+          .on("mouseout", unfade())
+          .attr("d", d3.svg.chord().radius(innerRadius));
+
+
+
+    function fade(d, i) {
+      var chosen = d;
+      document.getElementById("chordExplanation").innerHTML = nameByIndex.get(d.source.index)+
+      ' and '+ nameByIndex.get(d.target.index) + " shared "+ matrix[d.target.index][d.source.index] + " scenes."
+
+      //return function(d, i) {
+    	svg.selectAll(".chord")
+        .transition()
+    		.style("opacity", function(d){
+          if(chosen == d){
+            return .67;
+          }
+          return .03;
+        });
+      //};
+    }//fade
+    function fadeset(d, i) {
+      var chosen = d;
+      //return function(d, i) {
+      document.getElementById("chordExplanation").innerHTML = nameByIndex.get(d.index)
+      svg.selectAll(".chord")
+        .transition()
+        .style("opacity", function(d){
+
+          if(chosen.index == d.source.index || chosen.index == d.target.index){
+            return .67;
+          }
+          return .03;
+        });
+      //};
+    }//fade
+    function unfade() {
+
+      return function(d, i) {
+    	svg.selectAll(".chord").transition()
+    		.style("opacity", .67);
+        document.getElementById("chordExplanation").innerHTML = "Hover over the Chord Diagram"
+      };
+
+
+    }
+    // Fade function when hovering over chord
+    function fadeOnChord(d) {
+    	var chosen = d;
+    	wrapper.selectAll("path.chord")
+    		.transition()
+    		.style("opacity", function(d) {
+    			return d.source.index === chosen.source.index && d.target.index === chosen.target.index ? opacityDefault : opacityLow;
+    		});
+    }//fadeOnChord
+    });
+
+    d3.select(self.frameElement).style("height", outerRadius * 2 + "px");
+
+    </script>
+
+
+
+</div>
+<div class = "well" style = "margin-left: 10vw;width:80vw;" id = "chordExplanation"  >
+  Hover over the Chord Diagram
+</div>
+<br><h1></h1>
 </body>
-</html>
