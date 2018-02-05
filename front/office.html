@@ -23,13 +23,23 @@
     line-height: 7vw;
   }
   .tab { margin-left: 40px; }
+  #head  {
+          background-image: url("https://i.imgur.com/TsK9B1k.jpg");
+          padding-top: 15vw;
+          background-position: top;
+          vertical-align: top;
+          background-size: 100vw,70vw;
+          background-repeat: repeat-x;
+
+         }
 
 
   </style>
 </head>
 <body>
-  <h1 style = "margin-left:10vw">The Office: Analysis<br><small>By Tim Krock</h1></h1>
-  <div style = "text-align:left;margin-left:10vw;width:80vw;font-size: 3.55vw;color:#555555">
+  <div id = "head" style = "margin-left:0vw;width:100v;heigh:30vh;">
+  <h1 style = "margin-top:0px;margin-left:10vw;width:80vw">The Office: Analysis<br><small>By Tim Krock</h1></h1>
+  <div style = "text-align:left;margin-left:10vw;width:80vw;font-size: 2.5vh;color:#555555;">
     <small>
     <p>In a conversation about NBC's show The Office, often the first thing brought up
       is something along the lines "Steve Carell's performance made the show." or
@@ -42,8 +52,8 @@
     </p>
   </small>
 </div>
-  <br>
-<div id = "head_graph" style = "height:40vw;width:100vw;"></div>
+</div>
+<div id = "head_graph" style = "position:relative;top:-1vw;height:40vw;width:100vw;background-color: rgba(0,0,0,0);"></div>
 
 <script type = "text/javascript">
 var hoverStr = "Hover for Info";
@@ -63,52 +73,62 @@ var urlsJSON = {
   "Toby":"https://i.imgur.com/A3ULhp9.jpg",
   "Erin":"https://i.imgur.com/ADrCpjJ.png",
   "Kevin":"https://i.imgur.com/42IzGXd.jpg",
-  "Dwight":"https://i.imgur.com/0hIIZue.png"
+  "Dwight":"https://i.imgur.com/0hIIZue.png",
+  "Stanley": "https://i.imgur.com/EVljtJ8.png",
+  "Jan": "https://i.imgur.com/cfwbXI9.png"
 }
-var data ={  "Jim":1.706,
+
+var data ={  "Jim":1.6671,
   "Angela":-0.046,
-  "Andy":0.141,
-  "Pam":-0.054,
-  "Oscar":0.037,
-  "Phyllis":-0.011,
-  "Meredith":0.112,
-  "Michael":0.515,
-  "Ryan":-.067,
-  "Darryl":.044,
-  "Kelly":0.067,
-  "Toby":0.111,
-  "Erin":-.024,
-  "Kevin":-.0379,
+  "Andy":0.151,
+  "Pam":-0.061,
+  "Oscar":0.060,
+  "Phyllis":-0.019,
+  "Meredith":0.115,
+  "Michael":0.519,
+  "Ryan":-.037,
+  "Darryl":.027,
+  "Kelly":0.040,
+  "Toby":0.121,
+  "Erin":-.023,
+  "Kevin":-.069,
+  "Stanley":.067,
+  "Jan":.028
 }
-var data3   ={  "Jim":-.06,
-  "Angela":.004,
-  "Andy":.7,
-  "Pam":.5,
-  "Oscar":  .2,
-  "Phyllis":.011,
-  "Meredith":-.111,
-  "Michael":.515,
-  "Ryan":.067,
-  "Darryl":-.044,
-  "Kelly":-0.067,
-  "Toby":-0.111,
-  "Erin":.023,
-  "Kevin":.0379,
+var data3   ={  "Jim":1.6671,
+  "Angela":-0.046,
+  "Andy":0.151,
+  "Pam":-0.061,
+  "Oscar":0.060,
+  "Phyllis":-0.019,
+  "Meredith":0.115,
+  "Michael":0.519,
+  "Ryan":-.037,
+  "Darryl":.027,
+  "Kelly":0.040,
+  "Toby":0.121,
+  "Erin":-.023,
+  "Kevin":-.069,
+  "Stanley":.067,
+  "Jan":.028
 }
-var data2  ={  "Jim":.0023,
+var data2  ={
   "Angela":.0041,
-  "Andy":-.0005,
-  "Pam":-.0005,
-  "Oscar":.0015,
-  "Phyllis":.0085,
-  "Meredith":.0037,
-  "Michael":.0052,
-  "Ryan":-.0016,
-  "Darryl":.0006,
-  "Kelly":0.0042,
-  "Toby":0.0026,
-  "Erin":-.0076,
-  "Kevin":.0083,
+  "Kelly":0.0040,
+  "Jim":.0035,
+  "Andy":-.0008,
+  "Ryan":-.0022,
+  "Pam":.0004,
+  "Oscar":.0007,
+  "Phyllis":.005,
+  "Meredith":.0022,
+  "Darryl":.0004,
+  "Erin":-.0066,
+  "Kevin":.0112,
+  "Stanley": 0.0147,
+  "Michael":.0050,
+  "Toby":0.0020,
+  "Jan": .0030
 }
 
 var container = d3.select("#head_graph");
@@ -117,14 +137,25 @@ var svg = container.append("svg")
               .attr("height", "40vw");
 var defs = svg.append('svg:defs');
 var div = d3.select("#tipwell").append("div")
-    .style("opacity", 0);
+    .style("opacity", 1);
 
 var BUFFER = $('#head_graph').width()*.015
 var HEIGHT = $('#head_graph').height();
 var WIDTH = $('#head_graph').width()-2*BUFFER;
-
-
 var NUM_ENTRIES_1 = Object.keys(data).length;
+
+for(var i = 0; i < NUM_ENTRIES_1; i++){
+  console.log(Object.keys(data)[i])
+  if(data3[Object.keys(data)[i]]>0){
+    console.log(Math.log(.1+data3[Object.keys(data)[i]]))
+
+      data[Object.keys(data)[i]] = Math.log((.7+10*data3[Object.keys(data)[i]]))
+    }
+    else{
+      data[Object.keys(data)[i]] = -1*Math.log((.7+-10*data3[Object.keys(data)[i]]))
+    }
+}
+
 var RADIUS_1 = (WIDTH/(NUM_ENTRIES_1-1)-WIDTH/(NUM_ENTRIES_1-1)/(NUM_ENTRIES_1-1))/2 ;
 var SPACE = HEIGHT-RADIUS_1-RADIUS_1-RADIUS_1-RADIUS_1;
 var MIN_DATA_1 = 10000000;
@@ -132,6 +163,8 @@ var MAX_DATA_1 = -10000000;
 
 
 for(var i = 0; i < NUM_ENTRIES_1; i++){
+
+
    if(data[Object.keys(data)[i]]>MAX_DATA_1){
      MAX_DATA_1 = data[Object.keys(data)[i]];
    }
@@ -315,11 +348,26 @@ for(var i = 0; i < NUM_ENTRIES_2; i++){
   }
 }
 RADIUS_2 = min_distance
+//var Y_NAUGHT_1 = HEIGHT-RADIUS_1+MIN_DATA_1/DATA_RANGE_1*SPACE;
 
+var LOG_YNAUGHT = HEIGHT-RADIUS_1+(MIN_DATA_1)/DATA_RANGE_1*SPACE
+var tick1Height = HEIGHT-2*RADIUS_1+(MIN_DATA_1-Math.log(10.7))/DATA_RANGE_1*SPACE
+//var tick2Height = HEIGHT-RADIUS_1+(MIN_DATA_1-Math.log(.6))/DATA_RANGE_1*SPACE
+var tick2Height = HEIGHT-RADIUS_1+(MIN_DATA_1-Math.log(0))/DATA_RANGE_1*SPACE
+tick2Height = HEIGHT*1.5
+
+var tick1Height2 = HEIGHT*(Y_NAUGHT_2+0*RADIUS_2-(((HEIGHT+4*RADIUS_2)/DATA_RANGE_2*.0112)))
+tick1Height2 = (HEIGHT-2*RADIUS_2+(MIN_DATA_2-.003)/DATA_RANGE_2*SPACE)
+tick1Height2 = (HEIGHT-2*RADIUS_2+(MIN_DATA_2-.01)/DATA_RANGE_2*SPACE)
+
+var tick2Height2 = HEIGHT*(Y_NAUGHT_2+0*RADIUS_2+(((HEIGHT+4*RADIUS_2)/DATA_RANGE_2*-.005)))
+console.log(tick2Height2)
 var Y_BUFF = -RADIUS_1
+Y_NAUGHT_1 = LOG_YNAUGHT
+var DATA_RANGE
 var axis = svg.append("rect")
   .attr("x", XMIN/2-RADIUS_1)
-  .attr("y", Y_NAUGHT_1-RADIUS_1)
+  .attr("y", LOG_YNAUGHT-RADIUS_1)
   .attr("width", WIDTH - XMIN/2-3*BUFFER)
   .attr("height", 1)
   .attr("stroke","black");
@@ -332,23 +380,35 @@ var yaxis = svg.append("rect")
   .attr("stroke","white");
 var ytick= svg.append("rect")
   .attr("x", XMIN/2-RADIUS_1)
-  .attr("y", Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)
+  .attr("y", tick1Height)
   .attr("width", BUFFER)
   .attr("height", 1)
   .attr("stroke","black")
+/*var ytickHigh =svg.append("rect")
+  .attr("x", XMIN/2-RADIUS_1)
+  .attr("y", tick1Height)
+  .attr("width", BUFFER)
+  .attr("height", 1)
+  .attr("stroke","black")*/
 var ytickLow= svg.append("rect")
   .attr("x", XMIN/2-RADIUS_1)
-  .attr("y", 1.3*Y_NAUGHT_1)
+  .attr("y", tick2Height)//HEIGHT*1.5)
   .attr("width", BUFFER)
   .attr("height", 1)
   .attr("stroke","black")
+
 var ytickLabel= svg.append("text")
-  .text( "1.0")
+  .text(function(){
+
+
+    return "1.0 \u0394 IMDB"})
   .attr("x", XMIN/2-RADIUS_1+1.2*BUFFER)
   .attr("y", SPACE/DATA_RANGE_1*1+2.5*BUFFER)
   .attr("font-family", "sans-serif")
   .attr("font-size", "3vw")
-  .attr("fill", "#555555");for(var i = 0; i < NUM_ENTRIES_1; i++){
+  .attr("fill", "#555555");
+
+for(var i = 0; i < NUM_ENTRIES_1; i++){
 
   var key = Object.keys(data)[i];
   var url = urlsJSON[key];
@@ -410,7 +470,7 @@ var ytickLabel= svg.append("text")
 
  }
  function mouseover1(){
-   document.getElementById("tipwell").innerHTML = "<b>"+this.id+ "</b>: " + data[this.id] + " &Delta;IMDB"
+   document.getElementById("tipwell").innerHTML = "<b>"+this.id+ "</b>: " + data3[this.id] + " &Delta;IMDB"
    d3.select(this)
    .transition()
    //.attr("transform", "matrix(1,0,0,1,0,0)")
@@ -443,10 +503,21 @@ var ytickLabel= svg.append("text")
    .style("fill","url(#"+ this.id+"2)");
  }
  function TRANSITION1(){
+   document.getElementById("tipwell").innerHTML = hoverStr
    document.getElementById("info").innerHTML = "This graph shows the expected effect of a character "+
    "getting another line on the IMDB ratings of an episode of The Office."
-   d3.selectAll("circle").
-   transition().attr("transform", function(){
+   try{
+     console.log("HELLO")
+   }
+   catch(err){
+     console.log(err)
+   }
+   d3.selectAll("circle")
+   .transition()
+   .attr("r", String(Math.round(RADIUS_1)))
+   .transition()
+   .style("fill","url(#"+ this.id+")")
+   .transition().attr("transform", function(){
      var id = this.id
 
      var x = -OBJ_1_COORDINATES[id][0]+OBJ_2_COORDINATES[id][0]
@@ -457,30 +528,32 @@ var ytickLabel= svg.append("text")
    d3.selectAll("circle")
    .on("mouseover",mouseover2)
    .on("mouseout",mouseout2);
+
+
    ytick.transition().attr("transform", function(){
      //console.log(ytickLabel)
 
-     return "translate(0,"+(-(Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)+
-     Y_NAUGHT_2-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005-RADIUS_2)+")";
+     return "translate(0," + (-tick1Height + tick1Height2) + ")";
+     //+(-(Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)+Y_NAUGHT_2-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005-RADIUS_2)+")";
    });
    ytickLabel.transition().attr("transform", function(){
      //console.log(ytickLabel)
-     this.innerHTML = "0.005"
+     this.innerHTML = "0.010 &Delta;   IMDB"
      /*
      var text = d3.select('svg').selectAll('text')[0]
 
      for (var i=0; i<text.length; i++){
          console.log(text[i].innerHTML = "new")
      }*/
-     return "translate(0,"+(-(Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)+
-     Y_NAUGHT_2-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005-RADIUS_2)+")";
+     return "translate(0," + (-tick1Height + tick1Height2) + ")";
+     //+(-(Y_NAUGHT_1-(HEIGHT-4*RADIUS_1)/DATA_RANGE_1*1-RADIUS_1)+Y_NAUGHT_2-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005-RADIUS_2)+")";
    });
 
    ytickLow.transition().attr("transform", function(){
      //console.log(ytickLabel)
 
-     return "translate(0,"+(-(1.3*Y_NAUGHT_1)+
-     (Y_NAUGHT_2+-RADIUS_2-((-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005))))*1+")";
+     return "translate(0," +(-tick2Height + tick2Height2) + ")";
+     //+(-(1.3*Y_NAUGHT_1)+(Y_NAUGHT_2+-RADIUS_2-((-(HEIGHT-4*RADIUS_2)/DATA_RANGE_2*.005))))*1+")";
    });
 
 
@@ -489,23 +562,6 @@ var ytickLabel= svg.append("text")
       //return "translate(0,"+(-Y_NAUGHT_1+Y_NAUGHT_2)+" )"
       return "translate(0,"+(-Y_NAUGHT_1+Y_NAUGHT_2-RADIUS_1 + RADIUS_2)+" )"
    })
-
-      //ytickLabel.transition
-   ////////////////
-   //  RESET THE CIRCLE SIZE
-  /*    d3.selectAll("circle")
-      .transition()
-      .attr("r", String(Math.round(RADIUS_2)))
-      .transition()
-      .delay(3)
-      .style("fill","url(#"+ this.id+"2)");
-      d3.selectAll("circle")
-      .transition()
-      .attr("r", String(Math.round(RADIUS_2)))
-      .transition()
-      .style("fill","url(#"+ this.id+"2)");
-*/
-
        document.getElementById('a').classList.remove("active")
        document.getElementById('b').classList.add("active")
        document.getElementById('a').classList.remove("btn-primary")
@@ -517,6 +573,8 @@ function loadTipwell(){
 
 }
 function TRANSITION2(){
+  document.getElementById("tipwell").innerHTML = hoverStr
+
   document.getElementById("info").innerHTML = "This graph shows the expected impact of each character's "+
   "appearance on the IMDB ratings of an episode of The Office."
   d3.selectAll("circle").transition().attr("transform", "translate(0,0)").delay(5)
@@ -524,6 +582,10 @@ function TRANSITION2(){
     return "translate(0,0)"
 
     d3.selectAll("circle")
+    //.transition()
+    //.attr("r", String(Math.round(RADIUS_2)))
+    //.transition()
+    //.style("fill","url(#"+ this.id+"2)")
     .transition()
     .attr("r", String(Math.round(RADIUS_2)))
     .transition()
@@ -550,14 +612,14 @@ function TRANSITION2(){
   });
   ytickLabel.transition().attr("transform", function(){
     //console.log(ytickLabel)
-    this.innerHTML = "1.0"
+    this.innerHTML = "1.0 &Delta; IMDB"
 
     return "translate(0,0)";
   });
 
   d3.selectAll("circle")
-  .on("mouseover",mouseover1)
-  .on("mouseout",mouseout1)
+    .on("mouseover",mouseover1)
+    .on("mouseout",mouseout1)
   document.getElementById('b').classList.remove("active")
   document.getElementById('a').classList.add("active")
   document.getElementById('b').classList.remove("btn-primary")
@@ -635,7 +697,7 @@ function TRANSITION2(){
       <br><br>
       The following chart is the first regression I ran. The column in green shows the expected effect that that character's appearance
       in a given episode of the Office would be expected to have. <br>
-      <img style = "width:80vw;height:50vw;" src = "https://i.imgur.com/lfPVh9A.png" ></img>
+      <img style = "width:80vw;height:78vw;" src = "https://i.imgur.com/fnnWPHE.png" ></img>
       <br>
       For example, Micheal's coefficient is 0.515. That means that you can expected
       an episode with Micheal Scott to be rated .515 better than an episode without, holding all else constant. The fourth column, the P value
@@ -654,7 +716,7 @@ function TRANSITION2(){
       This second regression, I think, is really interesting. I regressed the ratings on the number of lines the main characters
       had in each episode. The coefficients in green, this time, show the marginal rate of return, in ratings, to lines. In English,
       if you give a character another line, what happens to the rating?
-      <img style = "width:80vw;height:50vw;" src = "https://i.imgur.com/G0feewV.png" ></img>
+      <img style = "width:80vw;height:78vw;" src = "https://i.imgur.com/emm9EGl.png" ></img>
       Statistically significantly, Micheal increases the show's ratings with his lines, but more interesting, and far more fun,
       are the two characters with higher coefficients: Phyllis and Kevin both have coefficients about 60 percent higher than Micheal.
       What this means is that the Kevin and Phyllis show would have been a massive hit–or that they didn't have many lines.
@@ -703,7 +765,10 @@ function TRANSITION2(){
 
 <br><br><div>
 <h1 style = "margin-left:10vw;width:80vw;font-size:5vw;line-height:4.5vw;">Chord Diagram: Shared Scenes Between Characters</h1>
-
+<h3>
+  <small style = "margin-left:10vw;width:80vw;">
+I feel like I should put something here. Ignore this.  </small>
+</h3>
   <div style = "width:94vw;margin-left:3vw;height:94vw;" id = "chord">
     <script>
     ///////////////////////////////////////////////////
