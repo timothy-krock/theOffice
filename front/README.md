@@ -1,1 +1,1 @@
-Front-end mockups of the different visualizations
+Front-end mockups of the different visualizations for the office visualization
